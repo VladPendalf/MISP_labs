@@ -13,7 +13,7 @@ PriorityQueue::PriorityQueue() : head(nullptr) {}
 
 PriorityQueue::~PriorityQueue()
 {
-    if (!head)
+    if (head)
     {
         Node* temp = head;
         while (head)
