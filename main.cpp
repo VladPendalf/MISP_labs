@@ -203,4 +203,23 @@ int main(int argc, char *argv[])
     //    Task10(arifm, geom);    //10. Используя алгоритмы stl сгенерировать арифметическцую прогрессию и геометрическую прогрессию
     //    std::vector<int> x,h;
     //    Task11(x,h); //11. Реализовать дискретную свёртку на stl и две сгенерировать последовательности
+    
+    //Задача 3 победила и я не смог её в фуннкцию засунуть
+    //    std::vector<int> nums;
+    //    std::ifstream iFile(argv[1]);
+    //    int temp = 0;
+    //    while (!iFile.eof()) {
+    //        iFile >> temp;
+    //        nums.push_back(temp);
+    //    }
+
+    //    auto it = std::unique(nums.begin(), nums.end());
+    //    nums.resize(std::distance(nums.begin(), it)); //вообще по хорошему надо еще shrink_to_fit использовать
+
+    //    int countOne = count(nums.begin(), nums.end(), 1);
+    //    int countZero = count(nums.begin(), nums.end(), 0);
+
+    //    std::ofstream oFile;
+    //    oFile.open(argv[2]);
+    //    oFile << countOne << " " << countZero;
 }
