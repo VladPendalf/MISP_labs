@@ -17,9 +17,9 @@ PriorityQueue::~PriorityQueue()
         Node* temp = head;
         while (head)
         {
+            head = head->next;
             delete temp;
             temp = head;
-            head = head->next;
         }
     }
 }
