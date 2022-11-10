@@ -1,7 +1,6 @@
 #include "priorityqueue.h"
 
 ///    PriorityQueue();
-//PriorityQueue(std::vector<int> v); //автоиндексация
 
 //void Insert(int Info, int priority);
 //void Pop();
