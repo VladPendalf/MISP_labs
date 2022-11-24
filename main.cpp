@@ -18,13 +18,19 @@ void Task1()
 //====================================================================================
 void Task2()
 {
-    PriorityQueue q;
-    std::vector<int> Test = {9, 7, 2, 4, 6, 8, 2, 1, 5};
-    for (std::size_t i = 0; i < Test.size(); ++i)
-        q.Insert(Test[i],i);
-    q.Show();
-    q.Pop();
-    q.Show();
+    MyPriorQueue<int> q;
+    q.push(1);
+    q.push(5);
+    q.push(6);
+    q.push(8);
+    q.push(8);
+    q.pop();
+    q.push(3);
+
+    while (!q.empty()) {
+        std::cout << q.top() << std::endl;
+        q.pop();
+    }
 }
 //====================================================================================
 void Task4(int N, std::vector<int> v)
