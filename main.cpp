@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <string>
 #include <fstream>
-#include <map>
+#include <unordered_map>
+#include <functional>
+#include <numeric>
 //13. Алгоритм Рабина-Карпа с алгоритмами STL и хранением скользящего хэша в векторе
 
 //====================================================================================
@@ -11,7 +13,7 @@ void Task1()
 {
     const std::vector<int> Test = {9, 7, 2, 4, 6, 8, 2, 1, 5}; //Output: 9 7 6 8 8 8 5
     SlidingWindowMax       Kitty(Test,3);                      //SlidingWindowMax(argFirst  = vector<int>,
-                                                               //                 argSecond = int )
+    //                 argSecond = int )
 }
 //====================================================================================
 void Task2()
@@ -52,7 +54,7 @@ void Task4(int N, std::vector<int> v)
 //====================================================================================
 void Task5(std::istream& FileName)
 {
-    std::map<std::string, int> words;
+    std::unordered_map<std::string, int> words;
     std::string word;
     while (FileName >> word)
         ++words[word];
@@ -115,14 +117,11 @@ void Task10(std::vector<int>& arifm, std::vector<int>& geom)
 {
     int step = rand()%10 - 10;
     int firstElem = rand()%10 - 10;
-    int countOfElem = rand()%10 + 1; //от 1 до 10 элементов в векторах
     arifm.push_back(firstElem);
     geom.push_back( firstElem);
-    for (std::size_t i = 0; i < countOfElem-1;++i)
-    {
-        arifm.push_back(arifm[i] + step);
-        geom.push_back(geom[i] * step);
-    }
+    std::generate(arifm.begin(),arifm.end(),[=] () mutable {return firstElem+=step;});
+    std::generate(geom.begin() ,geom.end() ,[=] () mutable {return firstElem*=step;});
+    //можно и через [&](){...} , но тогда firstelem будет изменён
     std::cout <<"\nАрифметическая прогрессия\n ";
     for (auto it : arifm)
     {
@@ -137,33 +136,60 @@ void Task10(std::vector<int>& arifm, std::vector<int>& geom)
 //====================================================================================
 void Task11(std::vector<int>& x,std::vector<int>& h)
 {
-    srand(0);
-    std::vector<int> y;
-    int countOfElem = rand()%10 + 1;
-    for (std::size_t i = 0; i < countOfElem;++i)
-    {
-        x.push_back((rand()%10 + 1));
-        std::cout << "\nX[i] = " << x[i];
-        h.push_back((rand()%10 + 1));
-        std::cout << "\th[i] = " << h[i];
-    }
+    std::vector<int> y(x.size());
     std::cout<<'\n';
-    int tempSum = 0;
-    for (std::size_t i = 0; i < x.size(); ++i)
+
+    int i = 1;
+    for (auto &it : y)
     {
-        for (std::size_t j = 0; j <= i;++j)
-        {
-            tempSum+= x[j]*h[i-j];
-        }
-        y.push_back(tempSum);
-        tempSum = 0;
+        it = std::inner_product(x.begin(),x.begin()+i, h.rend()-i,0);
+        i++;
     }
     for (auto it : y)
         std::cout <<"\t" << it;
 }
 //====================================================================================
 
-//Запускать это лучше по одному Task*() за рах, т.к. про вывод всех я что-то забыл ну и писал их по списку, который вы дали ~_~
+void Task12(std::string Text, std::string templ) //Text <= templ
+{
+    const int Smth_CONST = 31;
+    int mod = 1e9+7;
+
+    std::vector<long long> pow   (Text.length());  //все степени
+    std::vector<long long> h     (Text.length());  //префиксы text
+    std::vector<long long> cur_h (Text.length());  //Хэш Рабина
+
+    long long i = 1;
+    pow[0]   = 1;
+    h[0]     = ((Text[0] - 'a' + 1) * pow[0] ) % mod;
+    cur_h[0] = h[templ.length()-1];
+
+    std::generate(pow.begin()+1,
+                  pow.end()    ,
+                  [=]() mutable {return i = ((i * Smth_CONST) % mod);});
+
+    for (size_t i=1; i<Text.length(); ++i) {
+        h[i] = (((Text[i] - 'a' + 1) * pow[i])%mod + h[i-1])%mod;
+    }
+
+    for (size_t i = 1; i + templ.length() - 1 < Text.length(); ++i) {
+        cur_h[i] = (h[i+templ.length()-1]%mod - h[i-1])%mod ;
+    }
+
+    long long h_templ = 0;
+    for (size_t i=0; i<templ.length(); ++i)
+        h_templ = (h_templ + (templ[i] - 'a' + 1) * pow[i]) % mod;
+
+    size_t j = 0;
+    for (auto it : cur_h)
+    {
+        if (it == pow[j]*h_templ%mod)
+            std::cout << j << '\n';
+        ++j;
+    }
+    std::cout <<"\nWork is ready\n";
+}
+
 int main(int argc, char *argv[])
 {
     srand(time(0));
@@ -181,12 +207,15 @@ int main(int argc, char *argv[])
     //        std::cin >> v[i];
     //        std::cout <<"\n";
     //    }
-    //    Task4(N,v); //4. Исключить из массива первый четный элемент, следующий за максимальным.
+    //    Task4(9,{9, 7, 2, 4, 6, 8, 2, 1, 5}); //4. Исключить из массива первый четный элемент, следующий за максимальным.
     //    ======================================================================================
-    //    std::ifstream in("Text.txt");
-    //    Task5(in); //5. Напишите функцию, принимающую имя файла с текстом и подсчитывающую частоту встречающихся в нём слов. Каждая линия вывода имеет формат:
+    //        std::ofstream out("Text.txt");
+    //        out << "Hello Hello Nya Nya Nya KuKu Ku";
+    //        out.close();
+    //        std::ifstream in("Text.txt", std::ios::in);
+    //        Task5(in); //5. Напишите функцию, принимающую имя файла с текстом и подсчитывающую частоту встречающихся в нём слов. Каждая линия вывода имеет формат:
     //    <Слово>: <Сколько раз встречается это слово>
-    //    Task6({1,2,3,-4,5,6,7,8,9,-1,-2,-3,4});//6. Напишите функцию для подсчета положительных значений в векторе численных значений
+    //    Task6({1,2,3,4,5,6,7,8,9,-1,-2,-3,-4});//6. Напишите функцию для подсчета положительных значений в векторе численных значений
     //    Task7("help"); //7.	Написать функцию, принимающую произвольную строку и выводящую все её перестановки
     //    std::vector<Student> v(5);
     //    for (int i = 0; i < v.size(); ++i)
@@ -199,11 +228,14 @@ int main(int argc, char *argv[])
     //    Напишите функцию, сортирующую студентов в порядке убывания среднего балла.
     //    Task9({1,2,3,4,5,6,7,8,9}); //9.	Напишите функцию, принимающую последовательность,
     //      выполняющую её циклический сдвиг в произвольном направлении на произвольное число элементов, и выводящую результат.
-    //    std::vector<int> arifm,geom;
+    //    int size;
+    //    std::cout <<"Size input: "; {std::cin >> size;}
+    //    std::vector<int> arifm(size),geom(size);
     //    Task10(arifm, geom);    //10. Используя алгоритмы stl сгенерировать арифметическцую прогрессию и геометрическую прогрессию
-    //    std::vector<int> x,h;
-    //    Task11(x,h); //11. Реализовать дискретную свёртку на stl и две сгенерировать последовательности
-    
+    //    std::vector<int> x = {4,2,1,2,3}
+    //                    ,h = {1,2,4,2,3};
+    //        Task11(x,h); //11. Реализовать дискретную свёртку на stl и две сгенерировать последовательности
+
     //Задача 3 победила и я не смог её в фуннкцию засунуть
     //    std::vector<int> nums;
     //    std::ifstream iFile(argv[1]);
@@ -222,4 +254,5 @@ int main(int argc, char *argv[])
     //    std::ofstream oFile;
     //    oFile.open(argv[2]);
     //    oFile << countOne << " " << countZero;
+    //            Task12("cddabcdabcd","bc");
 }
